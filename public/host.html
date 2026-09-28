@@ -1,0 +1,23 @@
+<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Counting Sort - Profesor</title>
+<style>
+body{font-family:Arial;max-width:850px;margin:40px auto;padding:20px;background:#f4f6f8;color:#333}
+.card{background:#fff;padding:25px;border-radius:10px;box-shadow:0 2px 8px #0002;text-align:center}
+button{padding:10px 16px;background:#2980b9;color:#fff;border:0;border-radius:5px;cursor:pointer}
+.code{font-size:42px;font-weight:bold;letter-spacing:8px;margin:25px}
+table{width:100%;border-collapse:collapse;margin-top:20px}th,td{padding:10px;border-bottom:1px solid #eee}
+</style></head><body>
+<div class="card"><h1>🎮 Counting Sort</h1><h2>Panel del profesor</h2><button id="create">Crear sala</button><div id="out"></div></div>
+<script src="/socket.io/socket.io.js"></script><script>
+const s=io();let ranking=[];
+function esc(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function draw(){
+const el=document.getElementById("ranking"); if(!el)return;
+let h='<h2>🏆 Puntajes</h2><table><tr><th>#</th><th>Jugador</th><th>Puntos</th></tr>';
+ranking.forEach((p,i)=>h+=`<tr><td>${i+1}</td><td>${esc(p.name)}</td><td>${p.score}</td></tr>`);
+el.innerHTML=h+'</table>';
+}
+document.getElementById("create").onclick=()=>s.emit("createRoom");
+s.on("roomCreated",d=>{document.getElementById("out").innerHTML='<p>Código de sala:</p><div class="code">'+d.room+'</div><p>Comparte este código con tus estudiantes.</p><div id="ranking"></div>';draw();});
+s.on("ranking",rows=>{ranking=rows;draw();});
+</script></body></html>

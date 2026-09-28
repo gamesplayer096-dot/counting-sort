@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Juego Counting Sort - 3 Niveles</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 30px auto;
+      padding: 20px;
+      background-color: #f4f6f8;
+      color: #333;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    .nivel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+    }
+
+    .badge-nivel {
+      background-color: #e74c3c;
+      color: white;
+      padding: 5px 12px;
+      border-radius: 15px;
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+
+    .array-display {
+      font-size: 1.2rem;
+      font-weight: bold;
+      background-color: #eef2f5;
+      padding: 10px 15px;
+      border-radius: 5px;
+      display: inline-block;
+      letter-spacing: 2px;
+      color: #2c3e50;
+    }
+
+    .controls {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    input[type="number"] {
+      padding: 8px 12px;
+      font-size: 1rem;
+      width: 120px;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+      outline: none;
+    }
+
+    button {
+      padding: 8px 16px;
+      font-size: 1rem;
+      color: white;
+      background-color: #27ae60;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background-color: #219150;
+    }
+
+    button.btn-siguiente {
+      background-color: #2980b9;
+    }
+
+    button.btn-siguiente:hover {
+      background-color: #1f618d;
+    }
+
+    .feedback {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .feedback.exito {
+      color: #27ae60;
+    }
+
+    .feedback.error {
+      color: #e74c3c;
+    }
+
+    .cajones-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .cajon {
+      background: #f9f9f9;
+      border: 2px solid #3498db;
+      border-radius: 6px;
+      padding: 10px;
+      text-align: center;
+      min-width: 50px;
+    }
+
+    .cajon.acumulativo {
+      border-color: #9b59b6;
+      background: #fdfafb;
+    }
+
+    .cajon .indice {
+      font-size: 0.8rem;
+      color: #7f8c8d;
+      margin-bottom: 5px;
+      display: block;
+      font-weight: bold;
+    }
+
+    .cajon input {
+      width: 45px;
+      text-align: center;
+      font-weight: bold;
+      border: 1px solid #bdc3c7;
+    }
+
+    .oculto {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Desafío: Counting Sort</h1>
+
+  <!-- Encabezado de Nivel -->
+  <div class="card">
+    <div class="nivel-header">
+      <h2 id="titulo-nivel">Nivel 1 de 3</h2>
+      <span class="badge-nivel" id="badge-dificultad">FÁCIL</span>
+    </div>
+    <p>Arreglo a ordenar:</p>
+    <div class="array-display" id="arreglo-original"></div>
+  </div>
+
+  <!-- Paso 1: Encontrar el Máximo -->
+  <div class="card" id="seccion-paso1">
+    <h3>Encontrar el valor máximo</h3>
+    <p>Encuentra el valor máximo.</p>
+    
+    <div class="controls">
+      <input type="number" id="input-maximo" placeholder="Ingresa el valor..." min="0" />
+      <button onclick="validarMaximo()">Validar</button>
+    </div>
+    <div id="feedback-paso1" class="feedback"></div>
+  </div>
+
+  <!-- Paso 2: Definir el número de cajones -->
+  <div id="seccion-paso2" class="card oculto">
+    <h3>Crear cajones</h3>
+    <p>Crea los cajones necesarios.</p>
+
+    <div class="controls">
+      <input type="number" id="input-cant-cajones" placeholder="Total cajones..." min="1" />
+      <button onclick="validarCantidadCajones()">Crear Cajones</button>
+    </div>
+    <div id="feedback-paso2" class="feedback"></div>
+  </div>
+
+  <!-- Paso 3: Conteo de Ocurrencias en los Cajones -->
+  <div id="seccion-paso3" class="card oculto">
+    <h3>Contar ocurrencias</h3>
+    <p>Cuenta cuántas veces aparece cada número.</p>
+
+    <div id="contenedor-cajones" class="cajones-container"></div>
+
+    <div class="controls" style="margin-top: 20px;">
+      <button onclick="validarConteo()">Validar Conteo</button>
+    </div>
+    <div id="feedback-paso3" class="feedback"></div>
+  </div>
+
+  <!-- Paso 4: Suma Acumulativa Interactiva -->
+  <div id="seccion-paso4" class="card oculto">
+    <h3>Suma acumulativa</h3>
+    <p>Ingresa los valores del arreglo acumulado para cada posición:</p>
+
+    <div id="contenedor-acumulado" class="cajones-container"></div>
+
+    <div class="controls" style="margin-top: 20px;">
+      <button onclick="validarAcumulado()">Validar Suma Acumulativa</button>
+    </div>
+    <div id="feedback-paso4" class="feedback"></div>
+  </div>
+
+  <!-- Pantalla de Nivel Completado -->
+  <div id="seccion-completado" class="card oculto">
+    <h3>🎉 ¡Nivel Completado!</h3>
+    <p id="mensaje-nivel-exito"></p>
+    <div class="controls">
+      <button class="btn-siguiente" id="btn-siguiente-nivel" onclick="avanzarNivel()">Siguiente Nivel ➔</button>
+    </div>
+  </div>
+
+  <script>
+    // Configuración de los 3 niveles
+    const niveles = [
+      {
+        numero: 1,
+        dificultad: "FÁCIL",
+        colorBadge: "#27ae60",
+        arreglo: [1, 4, 1, 2, 0, 4, 2]
+      },
+      {
+        numero: 2,
+        dificultad: "MEDIO",
+        colorBadge: "#f39c12",
+        arreglo: [4, 2, 2, 8, 3, 3, 1]
+      },
+      {
+        numero: 3,
+        dificultad: "DIFÍCIL",
+        colorBadge: "#c0392b",
+        arreglo: [12, 5, 0, 8, 12, 3, 5, 8, 1, 3, 10]
+      }
+    ];
+
+    let nivelActualIndex = 0;
+    let arr = [];
+    let maxReal = 0;
+    let conteoCorrecto = [];
+    let acumuladoCorrecto = [];
+
+    // Inicializar el nivel
+    cargarNivel(nivelActualIndex);
+
+    function cargarNivel(index) {
+      const datosNivel = niveles[index];
+      arr = datosNivel.arreglo;
+      maxReal = Math.max(...arr);
+
+      // Actualizar UI del Encabezado
+      document.getElementById("titulo-nivel").textContent = `Nivel ${datosNivel.numero} de ${niveles.length}`;
+      const badge = document.getElementById("badge-dificultad");
+      badge.textContent = datosNivel.dificultad;
+      badge.style.backgroundColor = datosNivel.colorBadge;
+      document.getElementById("arreglo-original").textContent = `[${arr.join(", ")}]`;
+
+      // Limpiar inputs y ocultar secciones
+      resetearFormularios();
+    }
+
+    function resetearFormularios() {
+      document.getElementById("input-maximo").value = "";
+      document.getElementById("input-cant-cajones").value = "";
+      document.getElementById("feedback-paso1").textContent = "";
+      document.getElementById("feedback-paso2").textContent = "";
+      document.getElementById("feedback-paso3").textContent = "";
+      document.getElementById("feedback-paso4").textContent = "";
+
+      document.getElementById("seccion-paso2").classList.add("oculto");
+      document.getElementById("seccion-paso3").classList.add("oculto");
+      document.getElementById("seccion-paso4").classList.add("oculto");
+      document.getElementById("seccion-completado").classList.add("oculto");
+      document.getElementById("seccion-paso1").classList.remove("oculto");
+    }
+
+    function validarMaximo() {
+      const input = document.getElementById("input-maximo");
+      const valorIngresado = parseInt(input.value);
+      const feedback = document.getElementById("feedback-paso1");
+      const seccionPaso2 = document.getElementById("seccion-paso2");
+
+      if (isNaN(valorIngresado)) {
+        feedback.textContent = "Por favor, ingresa un número.";
+        feedback.className = "feedback error";
+        return;
+      }
+
+      if (valorIngresado === maxReal) {
+        feedback.textContent = "¡Correcto!";
+        feedback.className = "feedback exito";
+        seccionPaso2.classList.remove("oculto");
+      } else {
+        feedback.textContent = "Incorrecto. Observa detenidamente todos los elementos del arreglo.";
+        feedback.className = "feedback error";
+        seccionPaso2.classList.add("oculto");
+      }
+    }
+
+    function validarCantidadCajones() {
+      const input = document.getElementById("input-cant-cajones");
+      const cantIngresada = parseInt(input.value);
+      const feedback = document.getElementById("feedback-paso2");
+      const seccionPaso3 = document.getElementById("seccion-paso3");
+      const cajonesNecesarios = maxReal + 1;
+
+      if (isNaN(cantIngresada)) {
+        feedback.textContent = "Por favor, ingresa una cantidad.";
+        feedback.className = "feedback error";
+        return;
+      }
+
+      if (cantIngresada === cajonesNecesarios) {
+        feedback.textContent = "¡Correcto! Se han creado las casillas.";
+        feedback.className = "feedback exito";
+
+        conteoCorrecto = new Array(maxReal + 1).fill(0);
+        arr.forEach(num => conteoCorrecto[num]++);
+
+        generarCajones(cantIngresada);
+        seccionPaso3.classList.remove("oculto");
+      } else {
+        feedback.textContent = "Incorrecto. Piensa en qué posiciones o índices necesitas incluir.";
+        feedback.className = "feedback error";
+        seccionPaso3.classList.add("oculto");
+      }
+    }
+
+    function generarCajones(cantidad) {
+      const contenedor = document.getElementById("contenedor-cajones");
+      contenedor.innerHTML = "";
+
+      for (let i = 0; i < cantidad; i++) {
+        const cajonDiv = document.createElement("div");
+        cajonDiv.className = "cajon";
+
+        cajonDiv.innerHTML = `
+          <span class="indice">i = ${i}</span>
+          <input type="number" id="count-${i}" value="0" min="0" />
+        `;
+
+        contenedor.appendChild(cajonDiv);
+      }
+    }
+
+    function validarConteo() {
+      const feedback = document.getElementById("feedback-paso3");
+      const seccionPaso4 = document.getElementById("seccion-paso4");
+      let esCorrecto = true;
+
+      for (let i = 0; i <= maxReal; i++) {
+        const valorCajon = parseInt(document.getElementById(`count-${i}`).value) || 0;
+        if (valorCajon !== conteoCorrecto[i]) {
+          esCorrecto = false;
+          break;
+        }
+      }
+
+      if (esCorrecto) {
+        feedback.textContent = "¡Excelente conteo!";
+        feedback.className = "feedback exito";
+
+        acumuladoCorrecto = [...conteoCorrecto];
+        for (let i = 1; i < acumuladoCorrecto.length; i++) {
+          acumuladoCorrecto[i] += acumuladoCorrecto[i - 1];
+        }
+
+        generarCajonesAcumulados(maxReal + 1);
+        seccionPaso4.classList.remove("oculto");
+      } else {
+        feedback.textContent = "Respuesta incorrecta. Revisa el conteo en tus casillas.";
+        feedback.className = "feedback error";
+        seccionPaso4.classList.add("oculto");
+      }
+    }
+
+    function generarCajonesAcumulados(cantidad) {
+      const contenedor = document.getElementById("contenedor-acumulado");
+      contenedor.innerHTML = "";
+
+      for (let i = 0; i < cantidad; i++) {
+        const cajonDiv = document.createElement("div");
+        cajonDiv.className = "cajon acumulativo";
+
+        cajonDiv.innerHTML = `
+          <span class="indice">i = ${i}</span>
+          <input type="number" id="accum-${i}" value="0" min="0" />
+        `;
+
+        contenedor.appendChild(cajonDiv);
+      }
+    }
+
+    function validarAcumulado() {
+      const feedback = document.getElementById("feedback-paso4");
+      const seccionCompletado = document.getElementById("seccion-completado");
+      let esCorrecto = true;
+
+      for (let i = 0; i <= maxReal; i++) {
+        const valorAcumulado = parseInt(document.getElementById(`accum-${i}`).value) || 0;
+        if (valorAcumulado !== acumuladoCorrecto[i]) {
+          esCorrecto = false;
+          break;
+        }
+      }
+
+      if (esCorrecto) {
+        feedback.textContent = "¡Suma acumulativa correcta!";
+        feedback.className = "feedback exito";
+
+        const msg = document.getElementById("mensaje-nivel-exito");
+        const btnSiguiente = document.getElementById("btn-siguiente-nivel");
+
+        if (nivelActualIndex < niveles.length - 1) {
+          msg.textContent = `Has superado con éxito el Nivel ${niveles[nivelActualIndex].numero}. Presiona el botón para ir al siguiente desafío.`;
+          btnSiguiente.textContent = "Siguiente Nivel ➔";
+        } else {
+          msg.textContent = "🏆 ¡Felicidades! Has completado exitosamente todos los niveles de Counting Sort.";
+          btnSiguiente.textContent = "Reiniciar Juego 🔄";
+        }
+
+        seccionCompletado.classList.remove("oculto");
+      } else {
+        feedback.textContent = "Revisa la suma acumulativa en tus casillas.";
+        feedback.className = "feedback error";
+        seccionCompletado.classList.add("oculto");
+      }
+    }
+
+    function avanzarNivel() {
+      if (nivelActualIndex < niveles.length - 1) {
+        nivelActualIndex++;
+      } else {
+        nivelActualIndex = 0; // Reiniciar si terminó el último nivel
+      }
+      cargarNivel(nivelActualIndex);
+    }
+  </script>
+
+<style>
+#mp-login,#mp-rank{position:fixed;inset:0;background:rgba(244,246,248,.97);z-index:9999;display:flex;align-items:center;justify-content:center}
+#mp-login .mp-box,#mp-rank .mp-box{background:#fff;padding:28px;border-radius:12px;box-shadow:0 4px 18px rgba(0,0,0,.18);width:min(420px,92%);text-align:center}
+#mp-login input{padding:10px 12px;font-size:1rem;width:90%;border:2px solid #ccc;border-radius:5px;margin:7px 0}
+#mp-login button,#mp-rank button{padding:10px 16px;font-size:1rem;color:#fff;background:#2980b9;border:0;border-radius:5px;cursor:pointer;margin-top:8px}
+#mp-login .mp-error{color:#e74c3c;font-weight:bold;margin-top:8px}
+#mp-rank{display:none}.mp-table{width:100%;border-collapse:collapse;margin:15px 0}.mp-table th,.mp-table td{padding:8px;border-bottom:1px solid #eee}.mp-me{font-weight:bold;background:#eef7ff}
+</style>
+<div id="mp-login"><div class="mp-box"><h2>🎮 Counting Sort</h2><p>Ingresa tu nombre y el código de la sala.</p>
+<input id="mp-name" placeholder="Tu nombre" maxlength="30"><input id="mp-room" placeholder="Código de sala" maxlength="10">
+<br><button id="mp-join">Entrar a la sala</button><div id="mp-error" class="mp-error"></div></div></div>
+<div id="mp-rank"><div class="mp-box"><h2>🏆 Clasificación</h2><div id="mp-rank-content"></div><button id="mp-continue">Continuar</button></div></div>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+(function(){
+const socket=io();let playerName="",roomCode="",score=0;
+const login=document.getElementById("mp-login"),rank=document.getElementById("mp-rank");
+document.getElementById("mp-join").onclick=()=>{playerName=document.getElementById("mp-name").value.trim();roomCode=document.getElementById("mp-room").value.trim().toUpperCase();if(!playerName||!roomCode){document.getElementById("mp-error").textContent="Escribe tu nombre y el código.";return}socket.emit("joinRoom",{name:playerName,room:roomCode})};
+socket.on("joinError",m=>document.getElementById("mp-error").textContent=m);
+socket.on("joined",()=>login.style.display="none");
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function showRanking(rows){let h='<table class="mp-table"><tr><th>#</th><th>Jugador</th><th>Puntos</th></tr>';rows.forEach((p,i)=>h+=`<tr class="${p.name===playerName?'mp-me':''}"><td>${i+1}</td><td>${esc(p.name)}</td><td>${p.score}</td></tr>`);document.getElementById("mp-rank-content").innerHTML=h+"</table>";rank.style.display="flex";}
+socket.on("scoreUpdate",d=>{score=d.score;showRanking(d.ranking)});
+document.getElementById("mp-continue").onclick=()=>rank.style.display="none";
+const originalValidar=window.validarAcumulado;
+window.validarAcumulado=function(){
+  const before=document.getElementById("seccion-completado").classList.contains("oculto");
+  originalValidar();
+  const after=document.getElementById("seccion-completado").classList.contains("oculto");
+  if(before&&!after){
+    const idx=window.nivelActualIndex||0;
+    // Puntaje competitivo del nivel:
+    // - parte de los puntos obtenidos dentro del juego
+    // - penaliza cada equivocación
+    // - premia terminar rápido
+    const errores=Number(window.state?.errores||0);
+    const tiempo=Number(window.state?.tiempo||0);
+    const puntosJuego=Number(window.state?.puntos||0);
+    const bonusRapidez=Math.max(0,120-tiempo*2);
+    const penalizacionErrores=errores*20;
+    const puntajeNivel=Math.max(0,puntosJuego+bonusRapidez-penalizacionErrores);
+    score+=puntajeNivel;
+    socket.emit("levelComplete",{room:roomCode,score:score,level:idx+1,levelScore:puntajeNivel,errores:errores,tiempo:tiempo});
+  }
+};
+})();
+</script>
+</body>
+</html>
